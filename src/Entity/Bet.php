@@ -18,6 +18,12 @@ class Bet
     #[ORM\ManyToOne(targetEntity: user::class, inversedBy: 'bets')]
     private $user;
 
+    #[ORM\ManyToOne(targetEntity: matche::class, inversedBy: 'bets')]
+    private $matche;
+
+    #[ORM\ManyToOne(targetEntity: team::class, inversedBy: 'bets')]
+    private $team;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -31,6 +37,30 @@ class Bet
     public function setUser(?user $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getMatche(): ?matche
+    {
+        return $this->matche;
+    }
+
+    public function setMatche(?matche $matche): self
+    {
+        $this->matche = $matche;
+
+        return $this;
+    }
+
+    public function getTeam(): ?team
+    {
+        return $this->team;
+    }
+
+    public function setTeam(?team $team): self
+    {
+        $this->team = $team;
 
         return $this;
     }

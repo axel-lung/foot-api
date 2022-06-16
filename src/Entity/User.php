@@ -62,9 +62,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\OneToMany(mappedBy: 'userid', targetEntity: Bet::class)]
     private $bets;
 
+    #[ORM\ManyToMany(targetEntity: room::class, inversedBy: 'users')]
+    private $room;
+
     public function __construct()
     {
         $this->bets = new ArrayCollection();
+        $this->room = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -174,6 +178,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
                 $bet->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, room>
+     */
+    public function getRoom(): Collection
+    {
+        return $this->room;
+    }
+
+    public function addRoom(room $room): self
+    {
+        if (!$this->room->contains($room)) {
+            $this->room[] = $room;
+        }
+
+        return $this;
+    }
+
+    public function removeRoom(room $room): self
+    {
+        $this->room->removeElement($room);
 
         return $this;
     }

@@ -32,10 +32,14 @@ class Area
     #[ORM\OneToMany(mappedBy: 'area', targetEntity: Competition::class)]
     private $competitions;
 
+    #[ORM\OneToMany(mappedBy: 'area', targetEntity: Matche::class)]
+    private $matches;
+
     public function __construct()
     {
         $this->areas = new ArrayCollection();
         $this->competitions = new ArrayCollection();
+        $this->matches = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -115,6 +119,36 @@ class Area
             // set the owning side to null (unless already changed)
             if ($competition->getArea() === $this) {
                 $competition->setArea(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Matche>
+     */
+    public function getMatches(): Collection
+    {
+        return $this->matches;
+    }
+
+    public function addMatch(Matche $match): self
+    {
+        if (!$this->matches->contains($match)) {
+            $this->matches[] = $match;
+            $match->setArea($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatch(Matche $match): self
+    {
+        if ($this->matches->removeElement($match)) {
+            // set the owning side to null (unless already changed)
+            if ($match->getArea() === $this) {
+                $match->setArea(null);
             }
         }
 

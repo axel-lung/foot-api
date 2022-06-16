@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CompetitionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CompetitionRepository::class)]
@@ -35,6 +37,14 @@ class Competition
 
     #[ORM\ManyToOne(targetEntity: season::class, inversedBy: 'competitions')]
     private $season;
+
+    #[ORM\OneToMany(mappedBy: 'competition', targetEntity: Matche::class)]
+    private $matches;
+
+    public function __construct()
+    {
+        $this->matches = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -121,6 +131,36 @@ class Competition
     public function setSeason(?season $season): self
     {
         $this->season = $season;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Matche>
+     */
+    public function getMatches(): Collection
+    {
+        return $this->matches;
+    }
+
+    public function addMatch(Matche $match): self
+    {
+        if (!$this->matches->contains($match)) {
+            $this->matches[] = $match;
+            $match->setCompetition($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatch(Matche $match): self
+    {
+        if ($this->matches->removeElement($match)) {
+            // set the owning side to null (unless already changed)
+            if ($match->getCompetition() === $this) {
+                $match->setCompetition(null);
+            }
+        }
 
         return $this;
     }
