@@ -74,7 +74,7 @@ class OpenApiFactory implements OpenApiFactoryInterface
                 requestBody: new RequestBody(
                     content: new \ArrayObject([
                         'application/json' => [
-                            'schemas' => [
+                            'schema' => [
                                 '$ref' => '#/components/schemas/Credentials'
                             ]
                         ]
