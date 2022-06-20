@@ -9,7 +9,22 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MatcheRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    collectionOperations: [
+        'get' => [
+            'openapi_context' => [
+                'security' => [['bearer' => []]]
+            ]
+        ]
+    ],
+    itemOperations: [
+        'get' => [
+            'openapi_context' => [
+                'security' => [['bearer' => []]]
+            ]
+        ]
+    ]
+)]
 class Matche
 {
     #[ORM\Id]
@@ -41,27 +56,31 @@ class Matche
     #[ORM\Column(type: 'string', length: 7, nullable: true)]
     private $groupe;
 
-    #[ORM\ManyToOne(targetEntity: area::class, inversedBy: 'matches')]
+    #[ORM\ManyToOne(targetEntity: Area::class, inversedBy: 'matches')]
     private $area;
 
-    #[ORM\ManyToOne(targetEntity: competition::class, inversedBy: 'matches')]
+    #[ORM\ManyToOne(targetEntity: Competition::class, inversedBy: 'matches')]
     private $competition;
 
-    #[ORM\ManyToOne(targetEntity: team::class, inversedBy: 'matches')]
+    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'matches')]
     private $homeTeam;
 
-    #[ORM\ManyToOne(targetEntity: team::class, inversedBy: 'matches')]
+    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'matches')]
     private $awayTeam;
 
-    #[ORM\ManyToOne(targetEntity: team::class, inversedBy: 'matches')]
+    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'matches')]
     private $winnerTeam;
 
     #[ORM\OneToMany(mappedBy: 'matche', targetEntity: Bet::class)]
     private $bets;
 
+    #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'matche')]
+    private $rooms;
+
     public function __construct()
     {
         $this->bets = new ArrayCollection();
+        $this->rooms = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -165,60 +184,60 @@ class Matche
         return $this;
     }
 
-    public function getArea(): ?area
+    public function getArea(): ?Area
     {
         return $this->area;
     }
 
-    public function setArea(?area $area): self
+    public function setArea(?Area $area): self
     {
         $this->area = $area;
 
         return $this;
     }
 
-    public function getCompetition(): ?competition
+    public function getCompetition(): ?Competition
     {
         return $this->competition;
     }
 
-    public function setCompetition(?competition $competition): self
+    public function setCompetition(?Competition $competition): self
     {
         $this->competition = $competition;
 
         return $this;
     }
 
-    public function getHomeTeam(): ?team
+    public function getHomeTeam(): ?Team
     {
         return $this->homeTeam;
     }
 
-    public function setHomeTeam(?team $homeTeam): self
+    public function setHomeTeam(?Team $homeTeam): self
     {
         $this->homeTeam = $homeTeam;
 
         return $this;
     }
 
-    public function getAwayTeam(): ?team
+    public function getAwayTeam(): ?Team
     {
         return $this->awayTeam;
     }
 
-    public function setAwayTeam(?team $awayTeam): self
+    public function setAwayTeam(?Team $awayTeam): self
     {
         $this->awayTeam = $awayTeam;
 
         return $this;
     }
 
-    public function getWinnerTeam(): ?team
+    public function getWinnerTeam(): ?Team
     {
         return $this->winnerTeam;
     }
 
-    public function setWinnerTeam(?team $winnerTeam): self
+    public function setWinnerTeam(?Team $winnerTeam): self
     {
         $this->winnerTeam = $winnerTeam;
 
@@ -250,6 +269,33 @@ class Matche
             if ($bet->getMatche() === $this) {
                 $bet->setMatche(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Room>
+     */
+    public function getRooms(): Collection
+    {
+        return $this->rooms;
+    }
+
+    public function addRoom(Room $room): self
+    {
+        if (!$this->rooms->contains($room)) {
+            $this->rooms[] = $room;
+            $room->addMatche($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoom(Room $room): self
+    {
+        if ($this->rooms->removeElement($room)) {
+            $room->removeMatche($this);
         }
 
         return $this;

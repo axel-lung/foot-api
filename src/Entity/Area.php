@@ -9,7 +9,23 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AreaRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    security: 'is_granted("ROLE_USER")',
+    collectionOperations: [
+        'post' => [
+            'openapi_context' => [
+                'security' => [['bearer' => []]]
+            ]
+        ]
+    ],
+    itemOperations: [
+        'get' => [
+            'openapi_context' => [
+                'security' => [['bearer' => []]]
+            ]
+        ]
+    ]
+)]
 class Area
 {
     #[ORM\Id]
@@ -83,12 +99,12 @@ class Area
         return $this;
     }
 
-    public function getParentArea(): ?area
+    public function getParentArea(): ?Area
     {
         return $this->parentArea;
     }
 
-    public function setParentAreaId(?area $parentArea): self
+    public function setParentAreaId(?Area $parentArea): self
     {
         $this->parentArea = $parentArea;
 

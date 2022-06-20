@@ -51,12 +51,16 @@ class Room
     #[ORM\Column(type: 'boolean')]
     private $isCashPrice;
 
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'room')]
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'Room')]
     private $users;
+
+    #[ORM\ManyToMany(targetEntity: Matche::class, inversedBy: 'rooms')]
+    private $matche;
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->matche = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -159,6 +163,30 @@ class Room
         if ($this->users->removeElement($user)) {
             $user->removeRoom($this);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, matche>
+     */
+    public function getMatche(): Collection
+    {
+        return $this->matche;
+    }
+
+    public function addMatche(Matche $matche): self
+    {
+        if (!$this->matche->contains($matche)) {
+            $this->matche[] = $matche;
+        }
+
+        return $this;
+    }
+
+    public function removeMatche(Matche $matche): self
+    {
+        $this->matche->removeElement($matche);
 
         return $this;
     }

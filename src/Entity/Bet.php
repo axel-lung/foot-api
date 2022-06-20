@@ -7,7 +7,17 @@ use App\Repository\BetRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BetRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    security: 'is_granted("ROLE_USER")',
+    collectionOperations: [],
+    itemOperations: [
+        'get' => [
+            'openapi_context' => [
+                'security' => [['bearer' => []]]
+            ]
+        ]
+    ]
+)]
 class Bet
 {
     #[ORM\Id]
@@ -15,14 +25,14 @@ class Bet
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\ManyToOne(targetEntity: user::class, inversedBy: 'bets')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'bets')]
     private $user;
 
-    #[ORM\ManyToOne(targetEntity: matche::class, inversedBy: 'bets')]
+    #[ORM\ManyToOne(targetEntity: Matche::class, inversedBy: 'bets')]
     private $matche;
 
-    #[ORM\ManyToOne(targetEntity: team::class, inversedBy: 'bets')]
-    private $team;
+    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'bets')]
+    private $teams;
 
     public function getId(): ?int
     {
@@ -41,26 +51,26 @@ class Bet
         return $this;
     }
 
-    public function getMatche(): ?matche
+    public function getMatche(): ?Matche
     {
         return $this->matche;
     }
 
-    public function setMatche(?matche $matche): self
+    public function setMatche(?Matche $matche): self
     {
         $this->matche = $matche;
 
         return $this;
     }
 
-    public function getTeam(): ?team
+    public function getTeam(): ?Team
     {
-        return $this->team;
+        return $this->teams;
     }
 
-    public function setTeam(?team $team): self
+    public function setTeam(?Team $teams): self
     {
-        $this->team = $team;
+        $this->teams = $teams;
 
         return $this;
     }

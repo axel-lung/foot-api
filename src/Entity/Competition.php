@@ -9,7 +9,17 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CompetitionRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    security: 'is_granted("ROLE_USER")',
+    collectionOperations: [],
+    itemOperations: [
+        'get' => [
+            'openapi_context' => [
+                'security' => [['bearer' => []]]
+            ]
+        ]
+    ]
+)]
 class Competition
 {
     #[ORM\Id]
@@ -32,10 +42,10 @@ class Competition
     #[ORM\Column(type: 'string', length: 10, nullable: true)]
     private $plan;
 
-    #[ORM\ManyToOne(targetEntity: area::class, inversedBy: 'competitions')]
+    #[ORM\ManyToOne(targetEntity: Area::class, inversedBy: 'competitions')]
     private $area;
 
-    #[ORM\ManyToOne(targetEntity: season::class, inversedBy: 'competitions')]
+    #[ORM\ManyToOne(targetEntity: Season::class, inversedBy: 'competitions')]
     private $season;
 
     #[ORM\OneToMany(mappedBy: 'competition', targetEntity: Matche::class)]
@@ -111,24 +121,24 @@ class Competition
         return $this;
     }
 
-    public function getArea(): ?area
+    public function getArea(): ?Area
     {
         return $this->area;
     }
 
-    public function setArea(?area $area): self
+    public function setArea(?Area $area): self
     {
         $this->area = $area;
 
         return $this;
     }
 
-    public function getSeason(): ?season
+    public function getSeason(): ?Season
     {
         return $this->season;
     }
 
-    public function setSeason(?season $season): self
+    public function setSeason(?Season $season): self
     {
         $this->season = $season;
 
