@@ -9,7 +9,24 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    collectionOperations: [
+        'post' => [
+            "security" => "is_granted('ROLE_SYSTEM')",
+            'openapi_context' => [
+                'security' => [['bearerAuth' => []]]
+            ]
+        ]
+    ],
+    itemOperations: [
+        'get' => [
+            "security" => "is_granted('ROLE_USER')",
+            'openapi_context' => [
+                'security' => [['bearerAuth' => []]]
+            ]
+        ]
+    ]
+)]
 class Team
 {
     #[ORM\Id]

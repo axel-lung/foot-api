@@ -10,12 +10,19 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SeasonRepository::class)]
 #[ApiResource(
-    collectionOperations: [],
+    collectionOperations: [
+        'post' => [
+            "security" => "is_granted('ROLE_SYSTEM')",
+            'openapi_context' => [
+                'security' => [['bearerAuth' => []]]
+            ]
+        ]
+    ],
     itemOperations: [
         'get' => [
             "security" => "is_granted('ROLE_USER')",
             'openapi_context' => [
-                'security' => [['bearer' => []]]
+                'security' => [['bearerAuth' => []]]
             ]
         ]
     ]

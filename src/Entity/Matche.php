@@ -12,15 +12,23 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     collectionOperations: [
         'get' => [
+            "security" => "is_granted('ROLE_SYSTEM')",
             'openapi_context' => [
-                'security' => [['bearer' => []]]
+                'security' => [['bearerAuth' => []]]
+            ]
+        ],
+        'post' => [
+            "security" => "is_granted('ROLE_SYSTEM')",
+            'openapi_context' => [
+                'security' => [['bearerAuth' => []]]
             ]
         ]
     ],
     itemOperations: [
         'get' => [
+            "security" => "is_granted('ROLE_USER')",
             'openapi_context' => [
-                'security' => [['bearer' => []]]
+                'security' => [['bearerAuth' => []]]
             ]
         ]
     ]

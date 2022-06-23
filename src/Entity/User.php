@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
             'controller' => MeController::class,
             'read' => false,
             'openapi_context' => [
-                'security' => [['bearer' => []]]
+                'security' => [['bearerAuth' => []]]
             ]
         ],
         'post'
@@ -111,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = "ROLE_USER";
 
         return array_unique($roles);
     }
@@ -149,7 +149,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     public static function createFromPayload($id, array $payload)
     {
-        return (new User())->setId($id)->setEmail($payload['username'] ?? '');
+        return (new User())->setId($id)->setEmail($payload['username'] ?? '')->setRoles($payload['roles'] ?? '');
     }
 
     /**
