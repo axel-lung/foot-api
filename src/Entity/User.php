@@ -6,6 +6,8 @@ use ApiPlatform\Core\Action\NotFoundAction;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Controller\MeController;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -14,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource(
-    security: 'is_granted("ROLE_USER")',
+    
     collectionOperations: [
         'me' => [
             'pagination_enable' => false,
@@ -23,9 +25,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
             'controller' => MeController::class,
             'read' => false,
             'openapi_context' => [
-                'security' => [['bearer' => []]]
+                'security' => [['bearerAuth' => []]]
             ]
-        ]
+        ],
+        'post'
     ],
     itemOperations: [
         'get' => [
@@ -34,8 +37,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
             'read' => false,
             'output' => false
         ]
-        ],
-        normalizationContext: ['groups' => ['read:User']]
+    ],
+    normalizationContext: ['groups' => ['read:User']]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
@@ -55,6 +58,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[ORM\Column(type: 'string')]
     private $password;
+
+    #[ORM\OneToMany(mappedBy: 'userid', targetEntity: Bet::class)]
+    private $bets;
+
+    #[ORM\ManyToMany(targetEntity: Room::class, inversedBy: 'users')]
+    private $room;
+
+    public function __construct()
+    {
+        $this->bets = new ArrayCollection();
+        $this->room = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -96,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = "ROLE_USER";
 
         return array_unique($roles);
     }
@@ -134,6 +149,60 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     public static function createFromPayload($id, array $payload)
     {
-        return (new User())->setId($id)->setEmail($payload['username'] ?? '');
+        return (new User())->setId($id)->setEmail($payload['username'] ?? '')->setRoles($payload['roles'] ?? '');
+    }
+
+    /**
+     * @return Collection<int, Bet>
+     */
+    public function getBets(): Collection
+    {
+        return $this->bets;
+    }
+
+    public function addBet(Bet $bet): self
+    {
+        if (!$this->bets->contains($bet)) {
+            $this->bets[] = $bet;
+            $bet->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBet(Bet $bet): self
+    {
+        if ($this->bets->removeElement($bet)) {
+            // set the owning side to null (unless already changed)
+            if ($bet->getUser() === $this) {
+                $bet->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, room>
+     */
+    public function getRoom(): Collection
+    {
+        return $this->room;
+    }
+
+    public function addRoom(Room $room): self
+    {
+        if (!$this->room->contains($room)) {
+            $this->room[] = $room;
+        }
+
+        return $this;
+    }
+
+    public function removeRoom(Room $room): self
+    {
+        $this->room->removeElement($room);
+
+        return $this;
     }
 }
